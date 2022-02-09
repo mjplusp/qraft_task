@@ -1,0 +1,113 @@
+version: "3"
+services:
+
+  # Qraft-Users
+  qraft_users:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: qraft_task
+    container_name: qraft_task
+    environment:
+      - DJANGO_MODE=DEPLOY
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./qraft/docker_data/db:/srv/docker-server/database
+      - ./qraft/docker_data/logs:/srv/docker-server/logs
+  
+  # # nginx
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: nginx
+  #   restart: always
+  #   volumes:
+  #      - /Users/minje/data/nginx/nginx.conf:/etc/nginx/nginx.conf
+  #      - /Users/minje/data/nginx/conf.d:/etc/nginx/conf.d
+  #      - /Users/minje/data/nginx/logs:/var/log/nginx
+  #      - ./.static_root:/srv/springbank-quant/.static_root
+  #   ports:
+  #      - 80:80
+  #      - 443:443
+  
+  # # Portainer
+  # portainer:
+  #   image: portainer/portainer
+  #   container_name: portainer
+  #   ports: 
+  #      - "9000:9000"
+  #   volumes:
+  #      - /var/run/docker.sock:/var/run/docker.sock 
+  #      - /Users/minje/data/portainer/data:/data
+  
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/config:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    expose:
+      - "9090"
+    links:
+      - container_exporter:container_exporter
+
+  # # CAdvisor
+  # cadvisor:
+  #   image: google/cadvisor
+  #   container_name: cadvisor
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - /dev/disk/:/dev/disk:ro
+  #   expose:
+  #     - "8080"
+  #   ports:
+  #     - "8080:8080"
+  
+  container_exporter:
+    image: prom/container-exporter
+    container_name: container_exporter
+    restart: unless-stopped
+    volumes:
+      - /sys/fs/cgroup:/cgroup
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "9104"
+    ports:
+      - "9104:9104"
+  
+  # # Grafana
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   restart: unless-stopped
+  #   links:
+  #     - prometheus:prometheus
+  #   volumes:
+  #     - ./grafana/data:/var/lib/grafana
+  #     # - ./grafana/config:/etc/grafana
+  #   ports:
+  #     - "3000:3000"
+  #   user: root
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+
+  # node-exporter는 Host 정보를 얻어야 하기에 호스트에 직접 설치
+  # node-exporter:
+  #   image: prom/node-exporter-linux-arm64:latest
+  #   container_name: node-exporter
+  #   restart: unless-stopped
+  #   ports:
+  #     - "9100:9100"
+  #   expose:
+  #     - "9100"
