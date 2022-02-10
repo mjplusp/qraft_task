@@ -2,20 +2,66 @@ version: "3"
 services:
 
   # Qraft-Users
-  qraft_users:
+  qraft_users1:
     build:
       context: .
       dockerfile: Dockerfile
     image: qraft_task
-    container_name: qraft_task
+    container_name: qraft_users1
     environment:
       - DJANGO_MODE=DEPLOY
     ports:
-      - "8000:8000"
+      - "8001:8000"
+    volumes:
+      - ./qraft/docker_data/db:/srv/docker-server/database
+      - ./qraft/docker_data/logs:/srv/docker-server/logs
+
+ # Qraft-Users
+  qraft_users2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: qraft_task
+    container_name: qraft_users2
+    environment:
+      - DJANGO_MODE=DEPLOY
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./qraft/docker_data/db:/srv/docker-server/database
+      - ./qraft/docker_data/logs:/srv/docker-server/logs
+ # Qraft-Users
+  qraft_users3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: qraft_task
+    container_name: qraft_users3
+    environment:
+      - DJANGO_MODE=DEPLOY
+    ports:
+      - "8003:8000"
     volumes:
       - ./qraft/docker_data/db:/srv/docker-server/database
       - ./qraft/docker_data/logs:/srv/docker-server/logs
   
+  # HAProxy
+  HAProxy:
+    image: haproxy
+    container_name: haproxy
+    depends_on:
+      - qraft_users1
+      - qraft_users2
+      - qraft_users3
+    environment:
+      - BALANCE=leastconn
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./haproxy/:/usr/local/etc/haproxy/
+    ports:
+      - "80:80"
+      - "8404:8404"
+
   # # nginx
   # nginx:
   #   image: nginx:latest
