@@ -10,8 +10,8 @@ services:
     container_name: qraft_users1
     environment:
       - DJANGO_MODE=DEPLOY
-    ports:
-      - "8001:8000"
+    expose:
+      - 8000
     volumes:
       - ./qraft/docker_data/db:/srv/docker-server/database
       - ./qraft/docker_data/logs:/srv/docker-server/logs
@@ -25,8 +25,8 @@ services:
     container_name: qraft_users2
     environment:
       - DJANGO_MODE=DEPLOY
-    ports:
-      - "8002:8000"
+    expose:
+      - 8000
     volumes:
       - ./qraft/docker_data/db:/srv/docker-server/database
       - ./qraft/docker_data/logs:/srv/docker-server/logs
@@ -40,8 +40,8 @@ services:
     container_name: qraft_users3
     environment:
       - DJANGO_MODE=DEPLOY
-    ports:
-      - "8003:8000"
+    expose:
+      - 8000
     volumes:
       - ./qraft/docker_data/db:/srv/docker-server/database
       - ./qraft/docker_data/logs:/srv/docker-server/logs
@@ -62,7 +62,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8404:8404"
   
   # Prometheus
   prometheus:
@@ -106,8 +105,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     expose:
       - "9104"
-    ports:
-      - "9104:9104"
+    # ports:
+    #   - "9104:9104"
   
   # # Grafana
   # grafana:

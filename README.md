@@ -7,7 +7,6 @@ $ openssl req -x509 -days 365 -newkey rsa:2048 -keyout ./haproxy/certs/key.pem -
 각 API 및 사용 쿼리
 
 * Postman 등에서 토큰을 위해 사용 시에는 ssl verification 설정을 꺼두어야 함 (Self-Signed Key)
-* HAProxy에서 SSL 설정을 위해 git repo에 self-signed key 파일들을 업로드 해두었음
 
 ## GraphQL
 
@@ -42,16 +41,36 @@ JWT에는 필요한 모든 정보를 토큰에 포함하기 때문에 데이터�
 
 Docker 환경 내에서 구동되는 해당 서비스의 특성 상 Container 각각의 Metric 정보와 Host의 Metric 정보를 모두 수집할 필요가 있음.  
 
-이 Task에서는 오픈소스 모니터링 툴인 Prometheus를 이용하였음.  
-호스트, 컨테이너의 metric을 수집하는 Exporter 서버가 존재하고, Prometheus 서버는 Exporter Server의 Http EndPoint 주소로 접속해 Metric 데이터를 Scrapping 해옴  
-Prometheus는 여러 Exporter로부터 수집한 Metric을 한데 모아 관리.
+이 Task에서는 오픈소스 모니터링 툴인 Prometheus를 이용하였음.    
+호스트, 컨테이너의 metric을 수집하는 Exporter 서버가 존재하고, Prometheus 서버는 Exporter Server의 Http EndPoint 주소로 접속해 Metric 데이터를 Scrapping 해옴   
+Prometheus는 여러 Exporter로부터 수집한 Metric을 한데 모아 관리.  
 이후 Grafana와 같은 시각화 툴이 Prometheus 서버에 쿼리를 통해 데이터를 받아와 시각화 하게 되면 호스트와 컨테이너의 CPU 사용량, 메모리, Disk I/O, 네트워크 트래픽 등을 모니터링 할 수 있음
 
 ### 구현
-본 Task에서는 윈도우 환경에 가상으로 리눅스 환경을 만들어 작업해서 많이 사용되는 컨테이너 및 호스트 Metrics Exporter인 cadvisor, node-exporter가 아닌, container-exporter를 이용했음
+본 Task에서는 윈도우 환경에 가상으로 리눅스 환경을 만들어 작업해서 많이 사용되는 컨테이너 및 호스트 Metrics Exporter인 cadvisor, node-exporter가 아닌, container-exporter를 이용했음  
 container_exporter 컨테이너가 Running 상태에서 http://localhost:9104/metrics 에 접속 후 Export 되고 있는 Container Metric 정보를 확인할 수 있음
 
 ## Http TLS
+
+운영되는 컨테이너들은 외부에서 접속할 수 없도록 막아두고, 앞단에 웹서버가 SSL 인증 정보 확인 및 암호화/복호화를 담당.  
+이후 요청들은 컨테이너 내부에서 http 프로토콜에 따라 웹 서버 컨테이너와 통신
+### 구현
+HAProxy에서 SSL 설정을 위해 git repo에 self-signed key 파일들을 업로드 해두었음
+
+```
+$ openssl genrsa -des3 -out server.key 2048 # 개인 키 생성 (2048bit, rsa des3 encoding)
+$ openssl req -new -key server.key -out server.csr # 인증 요청서 생성
+```
+```
+$ cp server.key server.key.origin # 개인 키 password 제거
+$ openssl rsa -in server.key.origin -out server.key
+```
+```
+$ openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt # 개인 키와 인증 요청서를 이용해 인증 키 생성
+```
+
+이후 HAProxy에서 443 포트를 통한 https 통신에 발급한 인증서를 등록해두고 사용 
+
 
 ## Load Balancing / Health Check
 
