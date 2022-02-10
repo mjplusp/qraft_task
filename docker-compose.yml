@@ -1,12 +1,12 @@
 version: "3"
 services:
 
-  # Qraft-Users
+  # Qraft-Users1
   qraft_users1:
     build:
       context: .
       dockerfile: Dockerfile
-    image: qraft_task
+    image: qraft_users
     container_name: qraft_users1
     environment:
       - DJANGO_MODE=DEPLOY
@@ -16,12 +16,12 @@ services:
       - ./qraft/docker_data/db:/srv/docker-server/database
       - ./qraft/docker_data/logs:/srv/docker-server/logs
 
- # Qraft-Users
+ # Qraft-Users2
   qraft_users2:
     build:
       context: .
       dockerfile: Dockerfile
-    image: qraft_task
+    image: qraft_users
     container_name: qraft_users2
     environment:
       - DJANGO_MODE=DEPLOY
@@ -30,12 +30,13 @@ services:
     volumes:
       - ./qraft/docker_data/db:/srv/docker-server/database
       - ./qraft/docker_data/logs:/srv/docker-server/logs
- # Qraft-Users
+
+ # Qraft-Users3
   qraft_users3:
     build:
       context: .
       dockerfile: Dockerfile
-    image: qraft_task
+    image: qraft_users
     container_name: qraft_users3
     environment:
       - DJANGO_MODE=DEPLOY
@@ -60,31 +61,8 @@ services:
       - ./haproxy/:/usr/local/etc/haproxy/
     ports:
       - "80:80"
+      - "443:443"
       - "8404:8404"
-
-  # # nginx
-  # nginx:
-  #   image: nginx:latest
-  #   container_name: nginx
-  #   restart: always
-  #   volumes:
-  #      - /Users/minje/data/nginx/nginx.conf:/etc/nginx/nginx.conf
-  #      - /Users/minje/data/nginx/conf.d:/etc/nginx/conf.d
-  #      - /Users/minje/data/nginx/logs:/var/log/nginx
-  #      - ./.static_root:/srv/springbank-quant/.static_root
-  #   ports:
-  #      - 80:80
-  #      - 443:443
-  
-  # # Portainer
-  # portainer:
-  #   image: portainer/portainer
-  #   container_name: portainer
-  #   ports: 
-  #      - "9000:9000"
-  #   volumes:
-  #      - /var/run/docker.sock:/var/run/docker.sock 
-  #      - /Users/minje/data/portainer/data:/data
   
   # Prometheus
   prometheus:

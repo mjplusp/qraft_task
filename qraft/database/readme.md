@@ -1,1 +1,0 @@
-directory where db file is stored

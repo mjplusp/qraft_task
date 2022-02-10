@@ -6,6 +6,9 @@ $ openssl req -x509 -days 365 -newkey rsa:2048 -keyout ./haproxy/certs/key.pem -
 
 각 API 및 사용 쿼리
 
+* Postman 등에서 토큰을 위해 사용 시에는 ssl verification 설정을 꺼두어야 함 (Self-Signed Key)
+* HAProxy에서 SSL 설정을 위해 git repo에 self-signed key 파일들을 업로드 해두었음
+
 ## GraphQL
 
 ## Password 암호화
